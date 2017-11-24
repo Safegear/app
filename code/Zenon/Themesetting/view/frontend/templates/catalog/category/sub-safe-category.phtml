@@ -1,0 +1,10 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$currCategory = $objectManager->get('Magento\Framework\Registry')->registry('current_category');
+$currCategoryLevel = $currCategory->getLevel();
+$childCats = $currCategory->getChildrenCategories();
+?>
+<?php if(count($childCats) > 0 && $currCategoryLevel > 2):?>
+    <?php echo $this->getLayout()->createBlock('Zenon\Themesetting\Block\CategoryProducts')->setTemplate('Zenon_Themesetting::safeSubCategoryListing.phtml')->toHtml();?>
+<?php else: ?>
+<?php endif;?>

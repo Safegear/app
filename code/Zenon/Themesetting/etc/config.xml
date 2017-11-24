@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
+    <default>
+        <safe_categories>
+            <general>
+                <zenon_safe_categories>11,12,13,14,15</zenon_safe_categories>
+            </general>
+        </safe_categories>
+        <zenon_call_for_price>
+            <general>
+                <zcfp_enable>1</zcfp_enable>
+                <zcfp_text>Call for price</zcfp_text>
+                <zcfp_mobile>36 96 43 53</zcfp_mobile>
+            </general>
+        </zenon_call_for_price>
+    </default>
+</config>

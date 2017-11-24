@@ -1,0 +1,82 @@
+<?php
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+$_product = $block->getProduct();
+$_call = $block->getAtCall();
+$_code = $block->getAtCode();
+$_className = $block->getCssClass();
+$_attributeLabel = $block->getAtLabel();
+$_attributeType = $block->getAtType();
+$_attributeAddAttribute = $block->getAddAttribute();
+
+if ($_attributeLabel && $_attributeLabel == 'default') {
+    $_attributeLabel = $_product->getResource()->getAttribute($_code)->getFrontendLabel();
+}
+if ($_attributeType && $_attributeType == 'text') {
+    $_attributeValue = ($_helper->productAttribute($_product, $_product->$_call(), $_code)) ? $_product->getAttributeText($_code) : '';
+} else {
+    $_attributeValue = $_helper->productAttribute($_product, $_product->$_call(), $_code);
+
+    $_attributeOptionText = $_attributeValue;
+    $_attribute = $_product->getResource()->getAttribute($_code);
+    if ($_attribute->usesSource()) {
+        $_attributeOptionText = $_attribute->getSource()->getOptionText($_attributeValue);
+    }
+}
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$_productType = $_product->getTypeId();
+if($_productType == 'simple'):
+    $stockBlock = $objectManager->get('Magento\Catalog\Block\Product\View\Type\Simple');
+    $displayProductStockStatus = $stockBlock->displayProductStockStatus();
+elseif ($_productType == 'virtual'):
+    $stockBlock = $objectManager->get('Magento\Catalog\Block\Product\View\Type\Virtual');
+    $displayProductStockStatus = $stockBlock->displayProductStockStatus();
+elseif ($_productType == 'configurable'):
+    $stockBlock = $objectManager->get('Magento\ConfigurableProduct\Block\Product\View\Type\Configurable');
+    $displayProductStockStatus = $stockBlock->displayProductStockStatus();
+elseif ($_productType == 'bundle'):
+    $stockBlock = $objectManager->get('Magento\Bundle\Block\Catalog\Product\View\Type\Bundle');
+    $displayProductStockStatus = $stockBlock->displayProductStockStatus();
+elseif ($_productType == 'grouped'):
+    $stockBlock = $objectManager->get('Magento\GroupedProduct\Block\Product\View\Type\Grouped');
+    $displayProductStockStatus = $stockBlock->displayProductStockStatus();
+elseif ($_productType == 'downloadable'):
+    $stockBlock = $objectManager->get('Magento\Downloadable\Block\Catalog\Product\View\Type');
+    $displayProductStockStatus = $_product->getIsSalable();
+endif;
+?>
+
+<div class="atributos-container">
+    <h3 class="section-title padding-right sidebar-info-titles"><?php echo __('Delivery conditions'); ?></h3>
+    <div class="atributos-wrapper">
+
+        <?php if ($displayProductStockStatus): ?>
+            <div class="feature feature-icon-hover indent first atributos">
+                <?php if ($_product->isAvailable()): ?>
+                    <p><span class="ib ic ic-lg ic-package">‍</span></p>
+                    <p class="no-margin">
+                    <span class="stock available" title="<?php echo __('Availability') ?>"><?php echo __('Availability');?>:
+                        <strong><?php echo __('In stock');?></strong>
+                    </span>
+                    </p>
+                <?php else: ?>
+                    <p><span class="ib ic ic-lg ic-package">‍</span></p>
+                    <p class="no-margin">
+                        <span class="stock unavailable" title="<?php echo __('Availability') ?>"><?php echo __('Availability');?>:
+                            <strong><?php echo __('Out of stock');?></strong>
+                        </span>
+                    </p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($_attributeValue): ?>
+            <div class="feature feature-icon-hover indent atributos <?php echo $_className?>">
+                <p><span class="ib ic ic-lg ic-plane">‍</span></p>
+                <p class="no-margin">
+                    <span><?php echo $_attributeLabel?>: <?php echo $_attributeOptionText; ?></span>
+                </p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>

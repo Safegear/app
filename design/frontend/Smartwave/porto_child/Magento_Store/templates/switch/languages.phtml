@@ -1,0 +1,79 @@
+<?php
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php
+/**
+ * Language switcher template
+ */
+?>
+<?php
+    $_helper = $this->helper('Smartwave\Porto\Helper\Data');
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $_websites = $storeManager->getWebsites();
+    $_websiteData = array();
+    foreach($_websites as $website){
+        foreach($website->getStores() as $store){
+            $wedsiteId = $website->getId();
+            $wedsiteCode = $website->getCode();
+            $defaltStoreName = $website->getDefaultStore()->getName();
+            $defaltStoreCurrUrl = $website->getDefaultStore()->getCurrentUrl();
+            $storeObj = $storeManager->getStore($store);
+            $name = $website->getName();
+            $url = $storeObj->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+            array_push($_websiteData, array('name' => $name,'url' => $url,'id' => $wedsiteId,'code' => $wedsiteCode,'store_name' => $defaltStoreName, 'current_url' => $defaltStoreCurrUrl));
+        }
+    }
+    $websites = $_websiteData;
+    $currWebsiteid = $storeManager->getStore()->getWebsiteId();
+    $currStorename = $storeManager->getStore()->getName();
+?>
+
+<?php if (count($websites)>1): ?>
+    <?php $id = $block->getIdModifier() ? '-' . $block->getIdModifier() : ''?>
+    <div class="switcher store switcher-store" data-ui-id="store-switcher" id="switcher-store<?php echo $id?>">
+        <strong class="label switcher-label"><span><?php echo __('Website') ?></span></strong>
+        <div class="actions dropdown options switcher-options">
+            <?php foreach ($websites as $website): ?>
+                <?php if ($currWebsiteid == $website['id']): ?>
+                    <div class="action toggle switcher-trigger" id="switcher-store-trigger<?php echo $id?>">
+                        <strong class="view-<?php echo $block->escapeHtml($website['code']) ?>">
+                            <?php if($_helper->getConfig('porto_settings/header/language_flag')): ?>
+                                <img src="<?php echo $_helper->getBaseUrl().'wysiwyg/smartwave/porto/flags/'.$block->escapeHtml($block->escapeHtml($website['code'])).'.png'; ?>" />
+                            <?php endif; ?>
+                            <span><?php echo $block->escapeHtml($currStorename) ?></span>
+                        </strong>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <ul class="dropdown switcher-dropdown" data-target="dropdown" data-mage-init='{"dropdownDialog":{
+                    "appendTo":"#switcher-store<?php echo $id?> > .options",
+                    "triggerTarget":"#switcher-store-trigger<?php echo $id?>",
+                    "closeOnMouseLeave": false,
+                    "triggerClass":"active",
+                    "parentClass":"active",
+                    "buttons":null}}'>
+                <?php foreach ($websites as $website): ?>
+                    <?php if (!($currWebsiteid == $website['id'])): ?>
+                        <li class="switcher-option">
+                            <!--<a href='<?php /*echo <?php echo $website['current_url']?> */?>'>--> <!-- Current url switch per website -->
+                            <a href='<?php echo $website['url'] ?>'> <!-- Website Switch Url -->
+                                <?php if($_helper->getConfig('porto_settings/header/language_flag')): ?>
+                                    <img src="<?php echo $_helper->getBaseUrl().'wysiwyg/smartwave/porto/flags/'.$block->escapeHtml($website['code']).'.png'; ?>" />
+                                <?php endif; ?>
+                                <?php echo $block->escapeHtml($website['store_name']) ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+<?php endif; ?>

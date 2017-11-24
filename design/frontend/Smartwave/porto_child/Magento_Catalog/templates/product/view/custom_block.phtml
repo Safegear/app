@@ -1,0 +1,14 @@
+<?php echo $this->getChildHtml('product.info.brand');?>
+
+<?php echo $this->getChildHtml('product.info.stock.delivery');?>
+
+<?php
+    $product_view = $this->getConfig('porto_settings/product');
+    $block = $this->getLayout()->createBlock('Magento\Cms\Block\Block');
+    if($block) {
+        $block->setBlockId($product_view['side_custom_block']);
+    }
+    if($block){
+        echo $block->toHtml();
+    }
+?>

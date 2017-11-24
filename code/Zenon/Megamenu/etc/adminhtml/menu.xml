@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Zenon_Themesetting::zenon_top_nav_category" title="Top Navigation Category" module="Zenon_Themesetting" sortOrder="20" parent="Zenon_Themesetting::zenon_themesetting" action="adminhtml/system_config/edit/section/sw_megamenu" resource="Magento_Backend::content"/>
+    </menu>
+</config>

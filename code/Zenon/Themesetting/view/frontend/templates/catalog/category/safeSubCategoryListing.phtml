@@ -1,0 +1,284 @@
+<?php
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+$currentCategory = $this->getCurrentCategory(); // Get Current Category
+$currentCategoryId = $currentCategory->getId(); // Get Current Category Id
+$currentCategoryLoad = $this->getCategory($currentCategoryId); // Load Current Category
+
+$childCategoryCollection = $this->getChildCategoryCollection(); // Get Current Category Child Category Collection
+$childCategoryCount = count($childCategoryCollection); // Get Child Category Count
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore();
+$mediaUrl = $storeManager->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+$currentStoreId = $storeManager->getStoreId();
+function classification($cType, $optionId, $currentStoreId){
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $res = $objectManager->get('Magento\Framework\App\ResourceConnection');
+    $connection = $res->getConnection();
+    $tableName = $res->getTableName('zenon_classification');
+    if ($cType == 'bc'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE bc_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE bc_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'fec'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'feca1'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec1_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec1_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'feca2'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec2_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec2_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'et'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE et_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE et_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    else:
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fc_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fc_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    endif;
+
+    return $classification;
+}
+if(count($childCategoryCount) > 0): ?>
+    <div class="zd-subcategories-container">
+        <ul class="zd-subcat-list">
+            <?php foreach ($childCategoryCollection as $_category):?>
+                <li class="clearfix">
+                    <a class="catLinkOverlay" href="<?php echo $_category->getUrl().'?product_list_limit=all'?>"></a>
+                    <div class="zd-col-left clearfix">
+                        <div class="zd-cat-image">
+                            <?php
+                            $thumbImg = $_category->getThumbnail();
+                            $thumbImgUrl = $mediaUrl.'catalog/category/'.$thumbImg;
+                            $galleryImg1 = $_category->getGalleryImage1();
+                            $galleryImg1Url = $mediaUrl.'catalog/category/'.$galleryImg1;
+                            ?>
+                            <?php if($galleryImg1 != ''):?>
+                                <a href="<?php echo $_category->getUrl().'?product_list_limit=all' ?>" tabindex="-1">
+                                    <?php
+                                    $_imgHtml   = '';
+                                    $_imgHtml = '<div class="category-image"><img src="' . $galleryImg1Url . '" alt="' . $block->escapeHtml($_category->getName()) . '" title="' . $block->escapeHtml($_category->getName()) . '" class="image" /></div>';
+                                    $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
+                                    echo $_imgHtml;
+                                    ?>
+                                </a>
+                            <?php elseif($thumbImg != ''):?>
+                                <a href="<?php echo $_category->getUrl().'?product_list_limit=all' ?>" tabindex="-1">
+                                    <?php
+                                    $_imgHtml   = '';
+                                    $_imgHtml = '<div class="category-image"><img src="' . $thumbImgUrl . '" alt="' . $block->escapeHtml($_category->getName()) . '" title="' . $block->escapeHtml($_category->getName()) . '" class="image" /></div>';
+                                    $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
+                                    echo $_imgHtml;
+                                    ?>
+                                </a>
+                            <?php endif;?>
+                        </div>
+                        <div class="zd-cat-info">
+                            <h3 class="category-name">
+                                <a href="<?php echo $_category->getUrl().'?product_list_limit=all' ?>">
+                                    <?php echo $_category->getName(); ?>
+                                </a>
+                            </h3>
+                            <div class="category-description">
+                                <?php echo $this->escapeHtml($this->getCategoryModelSeries($_category)); ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="zd-col-middle clearfix">
+                        <div class="zd-cat-icons">
+                            <?php
+                            $burglaryClassification = $this->getCategoryProductAttribute($_category, 'burglary_classification');
+                            if($burglaryClassification != '' && $burglaryClassification != '0'){
+                                $bcs = classification('bc', $burglaryClassification, $currentStoreId);
+                                $bc = end($bcs);
+                                $imagePath = $bc['image'];
+                                $bcDesc = $bc['description'];
+                                $bcStatus = $bc['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($bcs) != 0 && $bcStatus == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($bcDesc) . '">';
+                                endif;
+                            }
+                            ?>
+                            <?php
+                            $fireExtinguisherCert = $this->getCategoryProductAttribute($_category, 'fire_extinguisher_cert');
+                            if($fireExtinguisherCert != '' && $fireExtinguisherCert != '0'){
+                                $fecs = classification('fec', $fireExtinguisherCert, $currentStoreId);
+                                $fec = end($fecs);
+                                $imagePath = $fec['image'];
+                                $fecDesc = $fec['description'];
+                                $fecStatus = $fec['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($fecs) != 0 && $fecStatus == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($fecDesc) . '">';
+                                endif;
+                            }
+                            ?>
+                            <?php
+                            $fireExtinguisherCertAdd1 = $this->getCategoryProductAttribute($_category, 'fire_extinguisher_cert_add1');
+                            if($fireExtinguisherCertAdd1 != '' && $fireExtinguisherCertAdd1 != '0'){
+                                $feca1s = classification('feca1', $fireExtinguisherCertAdd1, $currentStoreId);
+                                $feca1 = end($feca1s);
+                                $imagePath = $feca1['image'];
+                                $feca1Desc = $feca1['description'];
+                                $feca1Status = $feca1['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($feca1s) != 0 && $feca1Status == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($feca1Desc) . '">';
+                                endif;
+                            }
+                            ?>
+                            <?php
+                            $fireExtinguisherCertAdd2 = $this->getCategoryProductAttribute($_category, 'fire_extinguisher_cert_add2');
+                            if($fireExtinguisherCertAdd2 != '' && $fireExtinguisherCertAdd2 != '0'){
+                                $feca2s = classification('feca2', $fireExtinguisherCertAdd2, $currentStoreId);
+                                $feca2 = end($feca2s);
+                                $imagePath = $feca2['image'];
+                                $feca2Desc = $feca2['description'];
+                                $feca2Status = $feca2['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($feca2s) != 0 && $feca2Status == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($feca2Desc) . '">';
+                                endif;
+                            }
+                            ?>
+                            <?php
+                            $easTechnology = $this->getCategoryProductAttribute($_category, 'eas_technology');
+                            if($easTechnology != '' && $easTechnology != '0'){
+                                $ets = classification('et', $easTechnology, $currentStoreId);
+                                $et = end($ets);
+                                $imagePath = $et['image'];
+                                $etDesc = $et['description'];
+                                $etStatus = $et['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($ets) != 0 && $etStatus == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($etDesc) . '">';
+                                endif;
+                            }
+                            ?>
+                            <?php
+                            $fireClassification = $this->getCategoryProductAttribute($_category, 'fire_classification');
+                            if($fireClassification != '' && $fireClassification != '0'){
+                                $fcs = classification('fc', $fireClassification, $currentStoreId);
+                                $fc = end($fcs);
+                                $imagePath = $fc['image'];
+                                $fcDesc = $fc['description'];
+                                $fcStatus = $fc['status'];
+                                $imageUrl = $mediaUrl.$imagePath;
+                                if(count($fcs) != 0 && $fcStatus == 1):
+                                    echo '<img class="zd-tooltip" src="' . $imageUrl . '" title="' . $this->escapeHtml($fcDesc) . '">';
+                                endif;
+                            }
+                            ?>
+                        </div>
+                        <div class="zd-cat-attr">
+                            <?php
+                            $height = $_category->getHeight();
+                            $width = $_category->getWidth();
+                            $depth = $_category->getDepth();
+                            ?>
+                            <ul>
+                                <li>
+                                    <strong>Bolting:</strong>
+                                    <?php echo $this->escapeHtml(implode(' ' . __('or') . ' ', $this->getCategoryBolting($_category))); ?>
+                                </li>
+                                <?php if($height != ''):?>
+                                    <li>
+                                        <strong><?php echo __('Height')?>:</strong> <?php echo $height;?>
+                                    </li>
+                                <?php else:?>
+                                    <li>
+                                        <strong><?php echo __('Height')?>:</strong> <?php echo $this->getDimensionForCategory('height', $_category); ?>
+                                    </li>
+                                <?php endif;?>
+                                <?php if($width != ''):?>
+                                    <li>
+                                        <strong><?php echo __('Width')?>:</strong> <?php echo $width;?>
+                                    </li>
+                                <?php else:?>
+                                    <li>
+                                        <strong><?php echo __('Width')?>:</strong> <?php echo $this->getDimensionForCategory('width', $_category); ?>
+                                    </li>
+                                <?php endif;?>
+                                <?php if($depth != ''):?>
+                                    <li>
+                                        <strong><?php echo __('Depth')?>:</strong> <?php echo $depth;?>
+                                    </li>
+                                <?php else:?>
+                                    <li>
+                                        <strong><?php echo __('Depth')?>:</strong> <?php echo $this->getDimensionForCategory('depth', $_category); ?>
+                                    </li>
+                                <?php endif;?>
+                                <li>
+                                    <?php
+                                    $minPrice = $_category->getMinPrice();
+                                    $formattedPrice = $this->getFormatedPrice($minPrice);
+                                    ?>
+                                    <strong><?php echo __('Price') ?>:</strong> <?php echo __('starting at') ?> <span class="price"><?php echo $formattedPrice;?></span>
+                                </li>
+                                <li>
+                                    <button type="button" class="action primary" data-mage-init='{"redirectUrl":{"url":"<?php echo $_category->getUrl().'?product_list_limit=all' ?>"}}'>
+                                        <span>
+                                            <span><?php echo __('Click for info')?></span>
+                                        </span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="zd-col-right clearfix">
+                        <?php
+                        $graphImg = $_category->getGraphImg();
+                        $graphImgUrl = $mediaUrl.'catalog/category/'.$graphImg;
+                        ?>
+                        <?php if($graphImg != ""):?>
+                            <a class="zd-lightbox-single cboxElement" href="<?php echo $graphImgUrl;?>">
+                                <img src="<?php echo $graphImgUrl;?>">
+                            </a>
+                        <?php endif;?>
+                    </div>
+                </li>
+
+            <?php endforeach;?>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        require(['jquery','zColorBox','zTooltipster'], function () {
+            jQuery(document).ready(function() {
+                jQuery('.zd-tooltip').tooltipster({
+                    maxWidth: 160,
+                    contentAsHTML: true
+                });
+                jQuery(".zd-lightbox-single").colorbox({
+                    opacity:	0.5,
+                    speed:		300,
+                    maxWidth:   '95%',
+                    maxHeight:  '95%'
+                });
+            });
+        });
+    </script>
+<?php endif;?>

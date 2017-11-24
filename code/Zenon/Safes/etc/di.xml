@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!--======================================================================================================================================-->
+    <!-- Lock Type Image -->
+    <!--======================================================================================================================================-->
+    <!-- Create our type LockGridDataProvider -->
+    <virtualType name="LockGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Zenon\Safes\Model\Resource\Lock\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">LockGridFilterPool</argument> <!-- Define new object for filters -->
+        </arguments>
+    </virtualType>
+
+    <!-- Create our type LockGridFilterPool -->
+    <virtualType name="LockGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Type for safes_lock_listing_data_source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="safes_lock_listing_data_source" xsi:type="string">Zenon\Safes\Model\ResourceModel\Grid\Lock\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Simulate our class Zenon\Safes\Model\ResourceModel\Grid\Lock\Collection -->
+    <virtualType name="Zenon\Safes\Model\ResourceModel\Grid\Lock\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">zenon_lock</argument>
+            <argument name="resourceModel" xsi:type="string">Zenon\Safes\Model\ResourceModel\Lock</argument>
+        </arguments>
+    </virtualType>
+
+    <!--======================================================================================================================================-->
+    <!-- Classification -->
+    <!--======================================================================================================================================-->
+    <!-- Create our type ClassificationGridDataProvider -->
+    <virtualType name="ClassificationGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Zenon\Safes\Model\Resource\Classification\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">ClassificationGridFilterPool</argument> <!-- Define new object for filters -->
+        </arguments>
+    </virtualType>
+
+    <!-- Create our type ClassificationGridFilterPool -->
+    <virtualType name="ClassificationGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Type for safes_classification_listing_data_source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="safes_classification_listing_data_source" xsi:type="string">Zenon\Safes\Model\ResourceModel\Grid\Classification\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Simulate our class Zenon\Safes\Model\ResourceModel\Grid\Classification\Collection -->
+    <virtualType name="Zenon\Safes\Model\ResourceModel\Grid\Classification\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">zenon_classification</argument>
+            <argument name="resourceModel" xsi:type="string">Zenon\Safes\Model\ResourceModel\Classification</argument>
+        </arguments>
+    </virtualType>
+
+    <!--======================================================================================================================================-->
+    <!-- Classification Attribute-->
+    <!--======================================================================================================================================-->
+    <!-- Create our type ClassificationAttributeGridDataProvider -->
+    <virtualType name="ClassificationAttributeGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Zenon\Safes\Model\Resource\Classification\Attribute\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">ClassificationAttributeGridFilterPool</argument> <!-- Define new object for filters -->
+        </arguments>
+    </virtualType>
+
+    <!-- Create our type ClassificationAttributeGridFilterPool -->
+    <virtualType name="ClassificationAttributeGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Type for safes_classification_attribute_listing_data_source -->
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="safes_classification_attribute_listing_data_source" xsi:type="string">Zenon\Safes\Model\ResourceModel\Grid\Classification\Attribute\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Simulate our class Zenon\Safes\Model\ResourceModel\Grid\Classification\Attribute\Collection -->
+    <virtualType name="Zenon\Safes\Model\ResourceModel\Grid\Classification\Attribute\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">zenon_eav_attribute</argument>
+            <argument name="resourceModel" xsi:type="string">Zenon\Safes\Model\ResourceModel\Classification\Attribute</argument>
+        </arguments>
+    </virtualType>
+
+</config>

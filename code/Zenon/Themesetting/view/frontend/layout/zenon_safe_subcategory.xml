@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Zenon\Themesetting\Block\CategoryProducts" name="safe.category.view" template="Zenon_Themesetting::catalog/category/safe-view.phtml" before="-"/>
+        </referenceContainer>
+        <referenceBlock name="category.products.list" template="Zenon_Themesetting::catalog/product/list-safe.phtml" />
+
+        <referenceBlock name="product_list_toolbar">
+            <action method="setDefaultGridPerPage">
+                <argument name="limit" xsi:type="string">all</argument>
+            </action>
+        </referenceBlock>
+
+        <move element="category.image" destination="safe.category.view"/>
+        <move element="category.description" destination="safe.category.view"/>
+        <move element="category.cms" destination="safe.category.view"/>
+        <move element="category_desc_main_column" destination="safe.category.view"/>
+    </body>
+</page>

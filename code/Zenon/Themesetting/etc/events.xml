@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="layout_load_before">
+        <observer name="zenon_themesetting_safeobserver" instance="Zenon\Themesetting\Observer\SafeObserver" />
+    </event>
+    <!--<event name="controller_action_predispatch_catalog_category_view">
+        <observer name="zenon_themesetting_safepredispatch" instance="Zenon\Themesetting\Observer\SafePredispatch" />
+    </event>-->
+</config>

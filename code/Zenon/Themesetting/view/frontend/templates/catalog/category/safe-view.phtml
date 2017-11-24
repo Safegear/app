@@ -1,0 +1,306 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$currCategory = $objectManager->get('Magento\Framework\Registry')->registry('current_category');
+$categoryId = $currCategory->getId();
+$category = $this->getCategory($categoryId);
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+
+$storeManager = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore();
+$mediaUrl = $storeManager->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+$currentStoreId = $storeManager->getStoreId();
+
+function classification($cType, $optionId, $currentStoreId){
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $res = $objectManager->get('Magento\Framework\App\ResourceConnection');
+    $connection = $res->getConnection();
+    $tableName = $res->getTableName('zenon_classification');
+    if($cType == 'bc'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE bc_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE bc_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'fec'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'feca1'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec1_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec1_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'feca2'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fec2_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fec2_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    elseif ($cType == 'et'):
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE et_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE et_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    else:
+        $select = 'SELECT * FROM `'.$tableName.'` WHERE fc_option_id='.$optionId.' AND store_id='.$currentStoreId;
+        $classification = $connection->fetchAll($select);
+        if(count($classification) == 0):
+            $select = 'SELECT * FROM `'.$tableName.'` WHERE fc_option_id='.$optionId.' AND store_id=0';
+            $classification = $connection->fetchAll($select);
+        endif;
+    endif;
+
+    return $classification;
+}
+function classificationPrint($classifications, $mediaUrl){
+    $classification = end($classifications);
+    $imagePath = $classification['image'];
+    $description = $classification['description'];
+    $info = $classification['info'];
+    $status = $classification['status'];
+    $imageUrl = $mediaUrl.$imagePath;
+    $id = uniqid('zd-popup');
+    if($status == 1):
+        $html = '<li class="clearfix">'.
+            '<img class="zd-tooltip" src="' . $imageUrl . '">'.
+            '<div class="zd-feature">' .
+                strip_tags($description) .
+                '<a href="#" class="zdPopInfo" data-modal-id="' . $id . '"></a>' .
+            '</div>' .
+            '<div id="' . $id . '" class="zd-modal-box" style="display: none;">' .
+                '<a href="#" class="zd-modal-close"></a>' .
+                '<div class="zd-modal-box-inner std clearfix">' .
+                    $info .
+                '</div>' .
+            '</div>' .
+        '</li>';
+    else:
+        $html = '';
+    endif;
+
+    return $html;
+}
+?>
+<div class="zd-category-description clearfix">
+    <div class="zd-cat-description-left">
+        <div class="img-box img-box-style1">
+            <div class="product-image simple-mode">
+                <div id="wrap">
+                    <?php
+                    $thumbImg = $category->getThumbnail();
+                    $thumbImgUrl = $mediaUrl.'catalog/category/'.$thumbImg;
+                    $galleryImg1 = $category->getGalleryImage1();
+                    $galleryImg1Url = $mediaUrl.'catalog/category/'.$galleryImg1;
+                    ?>
+                    <?php if($galleryImg1 != ''):?>
+                        <a href="<?php echo $galleryImg1Url?>" class="cloud-zoom" id="zoom1">
+                            <?php
+                            $_imgHtml   = '';
+                            $_imgHtml = '<img src="' . $galleryImg1Url . '" alt="' . $block->escapeHtml($category->getName()) . '" title="' . $block->escapeHtml($category->getName()) . '" class="image" />';
+                            $_imgHtml = $_helper->categoryAttribute($category, $_imgHtml, 'image');
+                            echo $_imgHtml;
+                            ?>
+                        </a>
+                    <?php elseif($thumbImg != ''):?>
+                        <a href="<?php echo $thumbImgUrl?>" class="cloud-zoom" id="zoom1">
+                            <?php
+                            $_imgHtml   = '';
+                            $_imgHtml = '<img src="' . $thumbImgUrl . '" alt="' . $block->escapeHtml($category->getName()) . '" title="' . $block->escapeHtml($category->getName()) . '" class="image" />';
+                            $_imgHtml = $_helper->categoryAttribute($category, $_imgHtml, 'image');
+                            echo $_imgHtml;
+                            ?>
+                        </a>
+                    <?php endif;?>
+                </div>
+                <?php if($galleryImg1 != ''):?>
+                    <a id="zoom-btn" class="lightbox-group zoom-btn-large cboxElement" href="<?php echo $galleryImg1Url?>" title="<?php echo $category->getName();?>">Zoom</a>
+                <?php elseif($thumbImg != ''):?>
+                    <a id="zoom-btn" class="lightbox-group zoom-btn-large cboxElement" href="<?php echo $thumbImgUrl?>" title="<?php echo $category->getName();?>">Zoom</a>
+                <?php endif;?>
+            </div>
+            <div class="more-images slider-arrows3 itemslider-thumbnails count-multi">
+                <div id="itemslider-zoom" class="thumbnails slides owl-carousel owl-theme">
+                    <?php
+                    for ($i=2;$i<=10;$i++):
+                        if ($category->getData('gallery_image_' . $i)):
+                        ?>
+                            <div class="item">
+                                <a href="<?php echo $mediaUrl.'catalog/category/'.$category->getData('gallery_image_' . $i)?>" class="cloud-zoom-gallery lightbox-group" title="<?php echo $category->getName();?>">
+                                    <img src="<?php echo $mediaUrl.'catalog/category/'.$category->getData('gallery_image_' . $i)?>" />
+                                </a>
+                            </div>
+                        <?php
+                        endif;
+                    endfor;
+                    ?>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            require(['jquery','owl.carousel/owl.carousel.min','zColorBox','zTooltipster'], function ($) {
+                $(document).ready(function () {
+                    $(".lightbox-group").colorbox({
+                        rel: 'lightbox-group',
+                        opacity: 0.5,
+                        speed: 300,
+                        current: 'image {current} of {total}',
+                        maxWidth: '95%',
+                        maxHeight: '95%'
+                    });
+
+                    //Product thumbnails
+                    $(".cloud-zoom-gallery").first().removeClass("cboxElement");
+                    $(".cloud-zoom-gallery").click(function (e) {
+                        e.preventDefault();
+                        $("#zoom-btn").attr('href', $(this).attr('href'));
+                        $("#zoom-btn").attr('title', $(this).attr('title'));
+                        $(".cloud-zoom-gallery").each(function () {
+                            $(this).addClass("cboxElement");
+                        });
+                        $(this).removeClass("cboxElement");
+                        var imgUrl = $(this).children('img').attr('src');
+                        $('#zoom1').attr('href', imgUrl);
+                        $('#zoom1').attr('title', $(this).attr('title'));
+                        $('#zoom1 img').attr('src', imgUrl);
+                    });
+
+                    var owl = $('#itemslider-zoom');
+                    owl.owlCarousel({
+                        mouseDrag: false,
+                        items: 9,
+                        responsiveRefreshRate: 50,
+                        slideSpeed: 200,
+                        autoPlay: 5000,
+                        stopOnHover: true,
+                        rewindNav: true,
+                        rewindSpeed: 600,
+                        pagination: false,
+                        navigation: false,
+                        nav: true,
+                        navRewind: true,
+                        navText: ["<em class='porto-icon-angle-left'></em>", "<em class='porto-icon-angle-right'></em>"],
+                        dots: false,
+                        responsive: {
+                            0: { items: 3},
+                            320: { items: 3},
+                            480: { items: 3},
+                            640: { items: 3},
+                            768: { items: 3},
+                            992: { items: 3},
+                            1024: { items: 3},
+                            1100: { items: 9}
+                        }
+                    });
+                });
+
+                var t;
+                $(window).resize(function () {
+                    clearTimeout(t);
+                    t = setTimeout(function () {
+                        $(".more-images .cloud-zoom-gallery").first().click();
+                    }, 200);
+                });
+            });
+        </script>
+
+    </div>
+    <div class="zd-cat-description-right clearfix">
+        <h1><?php echo $category->getName(); ?></h1>
+        <div class="zd-cat-description-middle"><?php echo $category->getDescription(); ?></div>
+        <div class="zd-cat-description-right">
+            <ul class="clearfix">
+                <?php
+                $burglaryClassification = $this->getCategoryProductAttribute($category, 'burglary_classification');
+                if($burglaryClassification != '' && $burglaryClassification != '0'){
+                    $bcs = classification('bc', $burglaryClassification, $currentStoreId);
+                    if(count($bcs) != 0):
+                        echo classificationPrint($bcs, $mediaUrl);
+                    endif;
+                }
+                $fireExtinguisherCert = $this->getCategoryProductAttribute($category, 'fire_extinguisher_cert');
+                if($fireExtinguisherCert != '' && $fireExtinguisherCert != '0'){
+                    $fecs = classification('fec', $fireExtinguisherCert, $currentStoreId);
+                    if(count($fecs) != 0):
+                        echo classificationPrint($fecs, $mediaUrl);
+                    endif;
+                }
+                $fireExtinguisherCertAdd1 = $this->getCategoryProductAttribute($category, 'fire_extinguisher_cert_add1');
+                if($fireExtinguisherCertAdd1 != '' && $fireExtinguisherCertAdd1 != '0'){
+                    $feca1s = classification('feca1', $fireExtinguisherCertAdd1, $currentStoreId);
+                    if(count($feca1s) != 0):
+                        echo classificationPrint($feca1s, $mediaUrl);
+                    endif;
+                }
+                $fireExtinguisherCertAdd2 = $this->getCategoryProductAttribute($category, 'fire_extinguisher_cert_add2');
+                if($fireExtinguisherCertAdd2 != '' && $fireExtinguisherCertAdd2 != '0'){
+                    $feca2s = classification('feca2', $fireExtinguisherCertAdd2, $currentStoreId);
+                    if(count($feca2s) != 0):
+                        echo classificationPrint($feca2s, $mediaUrl);
+                    endif;
+                }
+                $easTechnology = $this->getCategoryProductAttribute($category, 'eas_technology');
+                if($easTechnology != '' && $easTechnology != '0'){
+                    $ets = classification('et', $easTechnology, $currentStoreId);
+                    if(count($ets) != 0):
+                        echo classificationPrint($ets, $mediaUrl);
+                    endif;
+                }
+                $fireClassification = $this->getCategoryProductAttribute($category, 'fire_classification');
+                if($fireClassification != '' && $fireClassification != '0'){
+                    $fcs = classification('fc', $fireClassification, $currentStoreId);
+                    if(count($fcs) != 0):
+                        echo classificationPrint($fcs, $mediaUrl);
+                    endif;
+                }
+                ?>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    require(['jquery','zColorBox','zTooltipster'],function () {
+        jQuery(".zd-tooltip").removeAttr( "title" );
+        jQuery(".zd-cat-description-right ul li img").click(function(){
+            jQuery(this).closest("li").find(".zdPopInfo").click();
+        });
+        //pop up
+        var appendthis =  ("<div class='zd-modal-overlay'></div>");
+
+        jQuery('a[data-modal-id]').click(function(e) {
+            e.preventDefault();
+            jQuery("body").addClass("zd-modal-overlay-open");
+            jQuery(".columns").append(appendthis);
+            jQuery(".zd-modal-overlay").fadeTo(500, 0.7);
+            var modalBox = jQuery(this).attr('data-modal-id');
+            jQuery('#'+modalBox).fadeIn(jQuery(this).data());
+        });
+
+        jQuery(document).on("click",".zd-modal-close, .zd-modal-overlay", function(e) {
+            e.preventDefault();
+            jQuery(".zd-modal-box, .zd-modal-overlay").fadeOut(500, function() {
+                jQuery(".zd-modal-overlay").remove();
+                jQuery("body").removeClass("zd-modal-overlay-open");
+            });
+        });
+
+        jQuery(window).resize(function() {
+            jQuery(".zd-modal-box").css({
+                top: (jQuery(window).height() - jQuery(".zd-modal-box").outerHeight()) / 2,
+                left: (jQuery(window).width() - jQuery(".zd-modal-box").outerWidth()) / 2
+            });
+        });
+        jQuery(window).resize();
+    });
+</script>
+
+<?php $this->getChildHtml('category.cms');?>

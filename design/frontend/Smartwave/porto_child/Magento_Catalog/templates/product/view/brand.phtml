@@ -1,0 +1,40 @@
+<?php
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+$_product = $block->getProduct();
+$_call = $block->getAtCall();
+$_code = $block->getAtCode();
+$_className = $block->getCssClass();
+$_attributeLabel = $block->getAtLabel();
+$_attributeType = $block->getAtType();
+$_attributeAddAttribute = $block->getAddAttribute();
+
+if ($_attributeLabel && $_attributeLabel == 'default') {
+    $_attributeLabel = $_product->getResource()->getAttribute($_code)->getFrontendLabel();
+}
+if ($_attributeType && $_attributeType == 'text') {
+    $_attributeValue = ($_helper->productAttribute($_product, $_product->$_call(), $_code)) ? $_product->getAttributeText($_code) : '';
+} else {
+    $_attributeValue = $_helper->productAttribute($_product, $_product->$_call(), $_code);
+
+    $_attributeOptionText = $_attributeValue;
+    $_attribute = $_product->getResource()->getAttribute($_code);
+    if ($_attribute->usesSource()) {
+        $_attributeOptionText = $_attribute->getSource()->getOptionText($_attributeValue);
+    }
+}
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$mediaUrl = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+?>
+
+<?php if ($_attributeValue): ?>
+    <?php
+    $brandImageUrl = $mediaUrl.'brand/'.strtolower(str_replace(' ', '_',$_attributeOptionText)).'.gif';
+    $brandUrl = $this->getUrl().'catalogsearch/advanced/result/?manufacturer[]='.$_attributeValue;
+    ?>
+    <div class="box-brand feature-wrapper bottom-border <?php echo $_className?>">
+        <a class="fade-on-hover" href="<?php echo $brandUrl?>" title="<?php echo __('Click to see more products from ').$_attributeOptionText; ?>">
+            <img src="<?php echo $brandImageUrl;?>" alt="<?php echo $_attributeOptionText; ?>"/>
+        </a>
+    </div>
+<?php endif; ?>

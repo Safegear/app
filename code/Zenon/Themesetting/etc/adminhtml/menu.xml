@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Zenon_Themesetting::zenon" title="Zenon" module="Zenon_Themesetting" sortOrder="65" resource="Magento_Backend::content"/>
+
+        <add id="Zenon_Themesetting::zenon_themesetting" title="Themesetting" module="Zenon_Themesetting" sortOrder="0" parent="Zenon_Themesetting::zenon" resource="Magento_Backend::content"/>
+        <add id="Zenon_Themesetting::zenon_safe_categories" title="Safe Categories" module="Zenon_Themesetting" sortOrder="0" parent="Zenon_Themesetting::zenon_themesetting" action="adminhtml/system_config/edit/section/safe_categories" resource="Magento_Backend::content"/>
+        <add id="Zenon_Themesetting::zenon_call_for_price" title="Call For Price" module="Zenon_Themesetting" sortOrder="10" parent="Zenon_Themesetting::zenon_themesetting" action="adminhtml/system_config/edit/section/zenon_call_for_price" resource="Magento_Backend::content"/>
+
+        <!--<add id="Zenon_Themesetting::zenon_safes" title="Safes" module="Zenon_Themesetting" sortOrder="10" parent="Zenon_Themesetting::zenon" resource="Magento_Backend::content"/>
+        <add id="Zenon_Themesetting::zenon_safes_locks" title="Manage Locks" module="Zenon_Themesetting" sortOrder="0" parent="Zenon_Themesetting::zenon_safes" action="safes/locks" resource="Magento_Backend::content"/>-->
+    </menu>
+</config>

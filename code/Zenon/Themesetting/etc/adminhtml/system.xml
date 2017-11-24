@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="zenon_themesetting" translate="label" sortOrder="70">
+            <label>Zenon Themesetting</label>
+        </tab>
+        <section id="safe_categories" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Zenon Safe Categories</label>
+            <tab>zenon_themesetting</tab>
+            <resource>Zenon_Themesetting::config</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Safe Categories</label>
+                <field id="zenon_safe_categories" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Safe Categories ID</label>
+                    <comment><![CDATA[Add category id using comma(,) separator , e.g.:<br/><em>11,12,13,14,15</em>]]></comment>
+                </field>
+            </group>
+        </section>
+        <section id="zenon_call_for_price" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Zenon Call For Price</label>
+            <tab>zenon_themesetting</tab>
+            <resource>Zenon_Themesetting::config</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Call For Price</label>
+                <field id="zcfp_enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Call For Price Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="zcfp_text" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Call For Price Text</label>
+                </field>
+                <field id="zcfp_mobile" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Call For Price Mobile</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

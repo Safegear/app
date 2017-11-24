@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Zenon_Safes::safes_head" title="Safes" module="Zenon_Safes" sortOrder="66" resource="Zenon_Safes::safes_head" />
+        <add id="Zenon_Safes::lock" title="Manage Locks" module="Zenon_Safes" sortOrder="10" parent="Zenon_Safes::safes_head" action="safes/lock" resource="Zenon_Safes::safes" />
+        <add id="Zenon_Safes::classification" title="Classification" module="Zenon_Safes" sortOrder="20" parent="Zenon_Safes::safes_head" action="safes/classification" resource="Zenon_Safes::safes" />
+        <!--<add id="Zenon_Safes::attribute" title="Manage Classification Attribute" module="Zenon_Safes" sortOrder="30" parent="Zenon_Safes::safes_head" action="safes/classification_attribute" resource="Zenon_Safes::safes" />-->
+    </menu>
+</config>

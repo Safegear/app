@@ -1,0 +1,341 @@
+<?php
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+use Magento\Framework\App\Action\Action;
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php
+/**
+ * Product list template
+ *
+ * @var $block \Magento\Catalog\Block\Product\ListProduct
+ */
+?>
+<?php
+$_productCollection = $block->getLoadedProductCollection();
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+$_imagehelper = $this->helper('Magento\Catalog\Helper\Image');
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$mediaUrl = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+?>
+<?php if (!$_productCollection->count()): ?>
+    <div class="message info empty"><div><?php echo __('We can\'t find products matching the selection.') ?></div></div>
+<?php else: ?>
+    <?php //echo $block->getToolbarHtml() ?>
+    <?php echo $block->getAdditionalHtml() ?>
+
+    <?php
+    $productsByLock = array();
+    $_lockTypeByLock = array();
+    $_lockDepthByLock = array();
+    $displayLockBlocks = false;
+    foreach ($_productCollection as $_product):
+        $product_id = $_product->getId();
+        $productLoad = $objectManager->get('Magento\Catalog\Model\Product')->load($product_id);
+        $productsByLock[$productLoad->getLock()][] = $productLoad;
+        if ($productLoad->getLock()):
+            $displayLockBlocks = true;
+        endif;
+        if (!array_key_exists($productLoad->getLock(), $_lockTypeByLock)):
+            $_lockTypeByLock[$productLoad->getLock()] = $productLoad->getLockType();
+        endif;
+        if (!array_key_exists($productLoad->getLock(), $_lockDepthByLock)):
+            $_lockDepthByLock[$productLoad->getLock()] = $productLoad->getLockDepth();
+        endif;
+    endforeach;
+
+    $res = $objectManager->get('Magento\Framework\App\ResourceConnection');
+    $connection = $res->getConnection('core_write');
+    $tableName = $res->getTableName('zenon_lock');
+    //$select = $this->getConnection()->fetchRow('SELECT sku,entity_id FROM ' . $tableName);
+    $select = $connection->select()->from($tableName, array('option_id', 'image'));
+    $lockImages = $connection->fetchPairs($select);
+
+    function getProductWithAttribute($products, $attribute)
+    {
+        foreach ($products as $_p) {
+            if ($_p->getData($attribute)) {
+                return $_p;
+            }
+        }
+        return false;
+    }
+    ?>
+
+    <?php $zenon_helper = $this->helper('Zenon\Themesetting\Helper\Data');?>
+    <?php $zcfp_enable = $zenon_helper->getConfig('zenon_call_for_price/general/zcfp_enable');?>
+    <?php $zcfp_text = $zenon_helper->getConfig('zenon_call_for_price/general/zcfp_text');?>
+    <?php $zcfp_mobile = $zenon_helper->getConfig('zenon_call_for_price/general/zcfp_mobile');?>
+
+    <?php if ($displayLockBlocks): ?>
+        <div class="zd-tabs">
+            <ul class="zd-tab-links clearfix">
+                <?php foreach ($productsByLock as $_lock => $products): ?>
+                    <?php
+                    $optionId = $_lock;
+                    $attr = $products[0]->getResource()->getAttribute('lock');
+                    if ($attr->usesSource()) {
+                        $optionText = $attr->getSource()->getOptionText($optionId);
+                    }
+                    ?>
+                    <li>
+                        <!--<a id="zd-tab<?php /*echo $this->escapeHtml($_lock); */?>" href="#zd-tab<?php /*echo $this->escapeHtml($_lock); */?>"><?php /*echo $this->escapeHtml($products[0]->getAttributeText('lock') ?: __('Other')) */?></a>-->
+                        <a id="zd-tab<?php echo $this->escapeHtml($_lock); ?>" href="#zd-tab<?php echo $this->escapeHtml($_lock); ?>"><?php echo $this->escapeHtml($optionText ?: __('Other')) ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+    <div class="zd-tab-content">
+        <?php foreach ($productsByLock as $_lock => $products): ?>
+            <div id="zd-tab<?php echo $this->escapeHtml($_lock); ?>" class="zd-tab">
+                <div class="zd-category-info clearfix">
+                    <?php $_lockType = $_lockTypeByLock[$_lock]; ?>
+                    <?php if ($_lockType && array_key_exists($_lockType, $lockImages)): # lock type attribute and lock type image set ?>
+                        <img src="<?php echo $mediaUrl  . $lockImages[$_lockType]; ?>">
+                    <?php elseif (array_key_exists($_lock, $lockImages)): # fallback ?>
+                        <img src="<?php echo $mediaUrl  . $lockImages[$_lock]; ?>">
+                    <?php endif; ?>
+                    <?php if ($displayLockBlocks): ?>
+                        <table>
+                            <?php $p = getProductWithAttribute($products, 'lock'); ?>
+                            <?php if ($p): ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $this->escapeHtml($p->getResource()->getAttribute('lock')->getStoreLabel()) ?>
+                                    </td>
+                                    <td>
+                                        <?php /*echo $this->escapeHtml($p->getAttributeText('lock')) */?>
+                                        <?php $optionId = $_lock;?>
+                                        <?php $attr = $p->getResource()->getAttribute('lock'); ?>
+                                        <?php
+                                        if ($attr->usesSource()) {
+                                            $optionText = $attr->getSource()->getOptionText($optionId);
+                                        }
+                                        echo $optionText;
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php $p = getProductWithAttribute($products, 'lock_type'); ?>
+                            <?php if ($p): ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $this->escapeHtml($p->getResource()->getAttribute('lock_type')->getStoreLabel()) ?>
+                                    </td>
+                                    <td>
+                                        <?php $optionId = $_lockTypeByLock[$_lock];?>
+                                        <?php $attr = $p->getResource()->getAttribute('lock_type'); ?>
+                                        <?php
+                                        if ($attr->usesSource()) {
+                                            $optionText = $attr->getSource()->getOptionText($optionId);
+                                        }
+                                        echo $optionText;
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                            <?php $p = getProductWithAttribute($products, 'lock_depth'); ?>
+                            <?php if ($p): ?>
+                                <tr>
+                                    <td>
+                                        <?php echo $this->escapeHtml($p->getResource()->getAttribute('lock_depth')->getStoreLabel()) ?>
+                                    </td>
+                                    <td>
+                                        <?php $optionId = $_lockDepthByLock[$_lock];;?>
+                                        <?php $attr = $p->getResource()->getAttribute('lock_depth'); ?>
+                                        <?php
+                                        if ($attr->usesSource()) {
+                                            $optionText = $attr->getSource()->getOptionText($optionId);
+                                        }
+                                        echo $optionText;
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </table>
+                    <?php endif; ?>
+                </div>
+
+                <div class="zd-category-products">
+                    <div class="zd-table-head">
+                        <div class="zd-th1"><?php echo __('Model');?></div>
+                        <div class="zd-th2"><?php echo __('External Dimensions');?><br><span><?php echo __('(HxWxD)');?></span></div>
+                        <div class="zd-th3"><?php echo __('Internal Dimensions');?><br><span><?php echo __('(HxWxD)');?></span></div>
+                        <div class="zd-th6"><?php echo __('Weight');?></div>
+                        <div class="zd-th7"><?php echo __('Price');?></div>
+                        <div class="zd-th3">&nbsp;</div>
+                    </div>
+                    <?php $iterator = 1; ?>
+                    <ol class="zd-products-list">
+                        <?php /** @var $_product \Magento\Catalog\Model\Product */ ?>
+                        <?php foreach ($_productCollection as $_product): ?>
+                            <?php
+                            $product_id = $_product->getId();
+                            $productLoad = $objectManager->get('Magento\Catalog\Model\Product')->load($product_id);
+                            $productLock = $productLoad->getLock();
+                            ?>
+                            <?php if($productLock == $_lock):?>
+
+                                <?php echo($iterator++ == 1) ? '<li class="item clearfix zd-active">' : '</li><li class="item clearfix">' ?>
+                                <a class="catLinkOverlay" href="<?php echo $_product->getProductUrl()?>"></a>
+                                <?php
+                                $_productNameStripped = $block->stripTags($_product->getName(), null, true);
+                                ?>
+                                <a class="zd-item-link clearfix" href="<?php echo $_product->getProductUrl()?>" title="<?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>">
+                                    <div class="zd-td1">
+                                        <h2 class="product-name"><?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?></h2>
+                                        <div class="zd-mob zd-mobTop">
+                                            <ul>
+                                                <li>
+                                                    <?php if($productLoad->getHeight() && $productLoad->getWidth() && $productLoad->getDepth()): ?>
+                                                        <strong><?php echo __('External Dimensions'); ?> <span><?php echo __('(HxWxD)'); ?></span>:</strong> <?php echo $this->escapeHtml(implode(' x ',array($productLoad->getHeight(),$productLoad->getWidth(),$productLoad->getDepth()))); ?>
+                                                    <?php endif; ?>
+                                                </li>
+                                                <li>
+                                                    <?php if($productLoad->getHeightInterior() && $productLoad->getWidthInterior() && $productLoad->getDepthInterior()): ?>
+                                                        <strong><?php echo __('Internal Dimensions'); ?> <span><?php echo __('(HxWxD)'); ?></span>:</strong> <?php echo $this->escapeHtml(implode(' x ',array($productLoad->getHeightInterior(),$productLoad->getWidthInterior(),$productLoad->getDepthInterior()))); ?>
+                                                    <?php endif; ?>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="zd-mob zd-mobBottom">
+                                            <ul>
+                                                <li>
+                                                    <?php if($productLoad->getShelfNumber()): ?>
+                                                        <strong><?php echo __('Shelves'); ?>:</strong> <?php echo $this->escapeHtml($productLoad->getAttributeText('shelf_number')); ?>
+                                                    <?php endif; ?>
+                                                </li>
+                                                <li>
+                                                    <?php if($productLoad->getCapacityLiter()): ?>
+                                                        <strong><?php echo __('Volume'); ?>:</strong> <?php echo (int)$productLoad->getCapacityLiter() ?> L
+                                                    <?php endif; ?>
+                                                </li>
+                                                <li>
+                                                    <?php if($productLoad->getWeight()): ?>
+                                                        <strong><?php echo __('Weight'); ?>:</strong> <?php echo (int)$productLoad->getWeight(); ?> kg
+                                                    <?php endif; ?>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="zd-td2">
+                                        <?php if($productLoad->getHeight() && $productLoad->getWidth() && $productLoad->getDepth()): ?>
+                                            <?php echo $this->escapeHtml(implode(' x ',array($productLoad->getHeight(),$productLoad->getWidth(),$productLoad->getDepth()))); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="zd-td3">
+                                        <?php if($productLoad->getHeightInterior() && $productLoad->getWidthInterior() && $productLoad->getDepthInterior()): ?>
+                                            <?php echo $this->escapeHtml(implode(' x ',array($productLoad->getHeightInterior(),$productLoad->getWidthInterior(),$productLoad->getDepthInterior()))); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="zd-td6">
+                                        <?php if($productLoad->getWeight()): ?>
+                                            <?php echo (int)$productLoad->getWeight() ?>kg
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="zd-td7">
+                                        <?php echo $block->getProductPrice($_product) ?>
+                                    </div>
+                                    <div class="zd-td3">
+                                        <?php $product_cfp = $productLoad->getCallForPrice();?>
+                                        <?php if($zcfp_enable == 1 && $product_cfp == 1):?>
+                                        <?php else: ?>
+                                            <button type="button" class="action tocart primary" data-mage-init='{"redirectUrl":{"url":"<?php echo $_product->getProductUrl() ?>"}}'>
+                                                <span>
+                                                    <span><?php echo __('Click for info');?></span>
+                                                </span>
+                                            </button>
+                                        <?php endif;?>
+                                    </div>
+                                </a>
+                                <?php echo($iterator == count($_productCollection)+1) ? '</li>' : '' ?>
+
+                            <?php endif;?>
+
+                        <?php endforeach; ?>
+                    </ol>
+                </div>
+
+                <ul class="zd-lock-other-links">
+
+                    <?php if ($displayLockBlocks): ?>
+                        <?php foreach ($productsByLock as $_l => $_p): ?>
+                            <?php if($_l !== $_lock): ?>
+                                <?php
+                                $optionId = $_l;
+                                $attr = $_p[0]->getResource()->getAttribute('lock');
+                                if ($attr->usesSource()) {
+                                    $optionText = $attr->getSource()->getOptionText($optionId);
+                                }
+                                ?>
+                                <li>
+                                    <a href="#zd-tab<?php echo $this->escapeHtml($_l); ?>"><?php echo __('Change to '.$this->escapeHtml($optionText) ?: __('Other').' safes') ?></a>
+                                </li>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <?php
+                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                    $currCategory = $objectManager->get('Magento\Framework\Registry')->registry('current_category');
+                    $currCategoryId = $currCategory->getId();
+                    $currCategoryLoad = $objectManager->create('Magento\Catalog\Model\Category')->load($currCategoryId);
+                    $parentCategoryName = $currCategory->getParentCategory()->getName()
+                    ?>
+                    <li>
+                        <a href="<?php echo $currCategory->getParentCategory()->getUrl() ?>"><?php echo __('Back to '); echo $parentCategoryName; ?></a>
+                    </li>
+                </ul>
+            </div>
+        <?php endforeach;?>
+    </div>
+
+    <?php //echo $block->getToolbarHtml() ?>
+    <?php if (!$block->isRedirectToCartEnabled()) : ?>
+        <script type="text/x-magento-init">
+        {
+            "[data-role=tocart-form], .form.map.checkout": {
+                "catalogAddToCart": {}
+            }
+        }
+        </script>
+    <?php endif; ?>
+
+
+
+    <?php if($currCategoryLoad->getLongDescription()): ?>
+        <div class="zd-category-info-long">
+            <?php echo $currCategoryLoad->getLongDescription(); ?>
+        </div>
+    <?php endif; ?>
+
+    <script type="text/javascript">
+        require(['jquery'],function () {
+            jQuery(document).ready(function() {
+                jQuery(".zd-tab-links li:eq(0)").addClass("zd-active");
+                jQuery(".zd-tab-content .zd-tab li:eq(0)").addClass("zd-active");
+                jQuery('.zd-tabs .zd-tab-links a').on('click', function(e)  {
+                    var currentAttrValue = jQuery(this).attr('href');
+                    // Show/Hide Tabs
+                    jQuery('.zd-tab-content ' + currentAttrValue).show().siblings().hide();
+                    // Change/remove current tab to active
+                    jQuery(this).parent('li').addClass('zd-active').siblings().removeClass('zd-active');
+                    e.preventDefault();
+                });
+                jQuery('.zd-lock-other-links a').on('click', function (e) {
+                    var lockClickId = jQuery(this).attr('href');
+                    if (lockClickId.substring(0, 1) == '#') {
+                        jQuery(lockClickId).trigger('click');
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+<?php endif; ?>

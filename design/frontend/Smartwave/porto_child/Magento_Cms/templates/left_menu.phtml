@@ -1,0 +1,7 @@
+<div class="home-side-menu-type2" style="margin-bottom:20px;">
+    <h2><em class="porto-icon-menu"></em> <?php echo __('Shop Categories');?></h2>
+    <div class="side-block side-menu-type2">
+        <?php echo $this->getLayout()->createBlock('Smartwave\Porto\Block\CategoryCollection')->setTemplate('Smartwave_Porto::category_side_2.phtml')->toHtml();?>
+    </div>
+</div>
+<?php echo $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('call_me_block')->toHtml();?>
